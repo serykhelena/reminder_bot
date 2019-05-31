@@ -1,0 +1,26 @@
+{
+   'ok':True,
+   'result':[
+      {
+         'update_id':235799754,
+         'message':{
+            'message_id':3,
+            'from':{
+               'id':133919098,
+               'is_bot':False,
+               'first_name':'Elena',
+               'last_name':'Serykh',
+               'language_code':'ru'
+            },
+            'chat':{
+               'id':133919098,
+               'first_name':'Elena',
+               'last_name':'Serykh',
+               'type':'private'
+            },
+            'date':1559217321,
+            'text':'Hello, bot!'
+         }
+      }
+   ]
+}
