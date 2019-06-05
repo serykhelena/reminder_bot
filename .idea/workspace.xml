@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f9a52f79-b7d7-49b4-9318-ea2ead9fb0a3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,11 +15,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/bot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="412">
-              <caret line="84" selection-start-line="84" selection-end-line="84" />
+            <state relative-caret-position="259">
+              <caret line="48" column="21" lean-forward="true" selection-start-line="48" selection-start-column="21" selection-end-line="48" selection-end-column="21" />
               <folding>
                 <element signature="e#19#33#0" expanded="true" />
-                <marker date="1559655764655" expanded="true" signature="617:918" ph="..." />
+                <marker date="1559715291463" expanded="true" signature="534:835" ph="..." />
               </folding>
             </state>
           </provider>
@@ -176,11 +175,11 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/bot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="412">
-          <caret line="84" selection-start-line="84" selection-end-line="84" />
+        <state relative-caret-position="259">
+          <caret line="48" column="21" lean-forward="true" selection-start-line="48" selection-start-column="21" selection-end-line="48" selection-end-column="21" />
           <folding>
             <element signature="e#19#33#0" expanded="true" />
-            <marker date="1559655764655" expanded="true" signature="617:918" ph="..." />
+            <marker date="1559715291463" expanded="true" signature="534:835" ph="..." />
           </folding>
         </state>
       </provider>

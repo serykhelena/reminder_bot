@@ -1,15 +1,8 @@
 #!/usr/bin/python
 
 import telebot
-from telebot.types import Message
-import random
-# import requests
 import datetime
 from datetime import date
-import json
-
-
-
 
 with open('bot_token.txt', 'r') as vip_file:
     TOKEN = vip_file.read()
@@ -22,8 +15,6 @@ with open('stickers_id.txt', 'r') as stickers_file:
 
 
 bot = telebot.TeleBot(TOKEN)
-
-
 
 
 date_now = date.today()
@@ -66,18 +57,23 @@ def command_start(message):
 @bot.message_handler(content_types=['text'])
 @bot.edited_message_handler(content_types=['text'])
 def event_handler(message):
-    radz_indx = message.text.find(':')
-    alarm_hour = int(''.join(c for c in message.text[:radz_indx] if c.isdigit()))
-    alarm_minute = int(''.join(c for c in message.text[radz_indx:] if c.isdigit()))
 
-    remind_msg = message.text[radz_indx+4:]
+    if 'Bot' or 'Hi' in message.text:
+        bot.reply_to(message, "I'm ready, my dear")
+        bot.send_sticker(message.chat.id, stickers_dict['STICKER_KAPI_HI'])
+    else:
+        radz_indx = message.text.find(':')
+        alarm_hour = int(''.join(c for c in message.text[:radz_indx] if c.isdigit()))
+        alarm_minute = int(''.join(c for c in message.text[radz_indx:] if c.isdigit()))
 
-    while datetime.datetime.now().hour != alarm_hour:
-        continue
-    while datetime.datetime.now().minute != alarm_minute:
-        continue
-    bot.reply_to(message, remind_msg)
-    bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_DONE'])
+        remind_msg = message.text[radz_indx+4:]
+
+        while datetime.datetime.now().hour != alarm_hour:
+            continue
+        while datetime.datetime.now().minute != alarm_minute:
+            continue
+        bot.reply_to(message, remind_msg)
+        bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_DONE'])
 
 
 bot.polling(timeout=60)
