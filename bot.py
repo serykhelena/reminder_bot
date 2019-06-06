@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
 import telebot
+from telebot import types
 import datetime
 from datetime import date
+import pickle
 
 with open('bot_token.txt', 'r') as vip_file:
     TOKEN = vip_file.read()
@@ -22,7 +24,7 @@ time_now = datetime.datetime.now().strftime("%H:%M:%S")
 hour_now = datetime.datetime.now().hour
 minute_now = datetime.datetime.now().minute
 
-
+USERS = set()
 
 #
 # @bot.message_handler(content_types=['text'])
@@ -51,12 +53,21 @@ def command_start(message):
                  f'Moscow time is {time_now}\n'
                  f'You can set time and event only for today {date_now}\n'
                  'Now give me time and name of event that you want I remind you'
+                 'Use key-word \"set\", please'
                  )
 
 
 @bot.message_handler(content_types=['text'])
 @bot.edited_message_handler(content_types=['text'])
 def event_handler(message):
+
+    if message.from_user.id in USERS:
+        reply = f"{message.from_user.first_name}, hello again!"
+        bot.reply_to(message, reply)
+        bot.send_sticker(message.chat.id, stickers_dict['STICKER_BEAR_HERO'])
+    else:
+        USERS.add(message.from_user.id)
+
     if 'Hi' in message.text:
         bot.reply_to(message, "Hello ^_____^")
         bot.send_sticker(message.chat.id, stickers_dict['STICKER_KAPI_HI'])
@@ -67,6 +78,13 @@ def event_handler(message):
 
         remind_msg = message.text[radz_indx+4:]
 
+        msg_minute = '0'+str(alarm_minute) if alarm_minute < 10 else str(alarm_minute)
+
+        bot.reply_to(message,
+                     f'Ok, I will remind you {date_now} at {alarm_hour}:{msg_minute}\n'
+                     f'with message \"{remind_msg}\"\n'
+                     )
+
         while datetime.datetime.now().hour != alarm_hour:
             continue
         while datetime.datetime.now().minute != alarm_minute:
@@ -75,5 +93,16 @@ def event_handler(message):
         bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_DONE'])
 
 
-bot.polling(timeout=60)
+@bot.inline_handler(lambda query: query.query == 'text')
+def query_text(inline_query):
+    try:
+        r = types.InlineQueryResultArticle('1', 'Result', types.InputTextMessageContent('Result message.'))
+        r2 = types.InlineQueryResultArticle('2', 'Result2', types.InputTextMessageContent('Result message2.'))
+        bot.answer_inline_query(inline_query.id, [r, r2])
+    except Exception as e:
+        print(e)
+
+
+
+bot.polling( )
 
