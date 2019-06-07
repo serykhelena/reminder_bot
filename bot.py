@@ -4,7 +4,6 @@ import telebot
 from telebot import types
 import datetime
 from datetime import date
-import pickle
 
 with open('bot_token.txt', 'r') as vip_file:
     TOKEN = vip_file.read()
@@ -18,21 +17,18 @@ with open('stickers_id.txt', 'r') as stickers_file:
 
 bot = telebot.TeleBot(TOKEN)
 
-
 date_now = date.today()
 time_now = datetime.datetime.now().strftime("%H:%M:%S")
 hour_now = datetime.datetime.now().hour
 minute_now = datetime.datetime.now().minute
 
-USERS = set()
+# USERS = set()
 
-#
-# @bot.message_handler(content_types=['text'])
-# @bot.edited_message_handler(content_types=['text'])
-# def bot_welcome(message: Message):
-#     if 'Bot' in message.text:
-#         bot.reply_to(message, "I'm ready, my dear")
-#         bot.send_sticker(message.chat.id, stickers_dict['STICKER_KAPI_HI'])
+src_markup = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+src_markup_btn1 = types.KeyboardButton('Лучшие')
+src_markup_btn2 = types.KeyboardButton('Всё подряд')
+src_markup.add(src_markup_btn1, src_markup_btn2)
+
 
 
 @bot.message_handler(commands=['help'])
@@ -44,34 +40,24 @@ def sticker_handler(message):
     print(message.sticker)
 
 
-
 @bot.message_handler(commands=['start'])
 def command_start(message):
     bot.reply_to(message,
                  'Hello, I\'m a demo reminder bot!\n'
                  'Remember that for now I\'m working only with Moscow time\n'
                  f'Moscow time is {time_now}\n'
-                 f'You can set time and event only for today {date_now}\n'
-                 'Now give me time and name of event that you want I remind you'
+                 f'You can set time and event ONLY for today {date_now}\n'
+                 'Now give me time and name of event that you want I remind you\n'
                  'Use key-word \"set\", please'
                  )
+    bot.register_next_step_handler(message, ask_time_and_event)
 
 
-@bot.message_handler(content_types=['text'])
-@bot.edited_message_handler(content_types=['text'])
-def event_handler(message):
+def ask_time_and_event(message):
 
-    if message.from_user.id in USERS:
-        reply = f"{message.from_user.first_name}, hello again!"
-        bot.reply_to(message, reply)
-        bot.send_sticker(message.chat.id, stickers_dict['STICKER_BEAR_HERO'])
-    else:
-        USERS.add(message.from_user.id)
-
-    if 'Hi' in message.text:
-        bot.reply_to(message, "Hello ^_____^")
-        bot.send_sticker(message.chat.id, stickers_dict['STICKER_KAPI_HI'])
-    elif 'set' in message.text:
+    chat_id = message.chat.id
+    text = message.text
+    if 'set' in text:
         radz_indx = message.text.find(':')
         alarm_hour = int(''.join(c for c in message.text[:radz_indx] if c.isdigit()))
         alarm_minute = int(''.join(c for c in message.text[radz_indx:] if c.isdigit()))
@@ -91,18 +77,46 @@ def event_handler(message):
             continue
         bot.reply_to(message, remind_msg)
         bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_DONE'])
+    else:
+        bot.reply_to(message, 'Please, use key-word \'set\'')
 
 
-@bot.inline_handler(lambda query: query.query == 'text')
-def query_text(inline_query):
-    try:
-        r = types.InlineQueryResultArticle('1', 'Result', types.InputTextMessageContent('Result message.'))
-        r2 = types.InlineQueryResultArticle('2', 'Result2', types.InputTextMessageContent('Result message2.'))
-        bot.answer_inline_query(inline_query.id, [r, r2])
-    except Exception as e:
-        print(e)
+@bot.message_handler(content_types=['text'])
+@bot.edited_message_handler(content_types=['text'])
+def event_handler(message):
+
+    text = message.text.lower()
+
+    # if message.from_user.id in USERS:
+    #     if 'hi' or 'hello' in text:
+    #         reply = f"{message.from_user.first_name}, Hello again!"
+    #         bot.reply_to(message, reply)
+    #         bot.send_sticker(message.chat.id, stickers_dict['STICKER_BEAR_HERO'])
+    # else:
+    #     USERS.add(message.from_user.id)
+    #     if 'hi' or 'hello' in text:
+    #         bot.reply_to(message, "Hello ^_____^")
+    #         bot.send_sticker(message.chat.id, stickers_dict['STICKER_KAPI_HI'])
+
+    if 'hi' in text or 'hello' in text:
+        reply = f"{message.from_user.first_name}, Hello!"
+        bot.reply_to(message, reply)
+        bot.send_sticker(message.chat.id, stickers_dict['STICKER_KAPI_HI'])
+    elif 'bye' in text:
+        reply = f"Bye, {message.from_user.first_name}! Hope to see you soon!"
+        bot.reply_to(message, reply)
+        bot.send_sticker(message.chat.id, stickers_dict['STICKER_AVOCADO_BYE'])
+    else:
+        bot.reply_to(message,
+                     f"{message.from_user.first_name}, Sorry, I don\'t get it!"
+                     )
+        bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_AWKWARD'])
 
 
+@bot.message_handler(content_types=['photo'])
+def text_handler(message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, 'It\'s cool')
 
-bot.polling( )
-
+if __name__ == '__main__':
+    bot.polling(none_stop=True)
