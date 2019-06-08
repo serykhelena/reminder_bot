@@ -4,9 +4,15 @@ import telebot
 from telebot import types
 import datetime
 from datetime import date
+import os
 
-with open('bot_token.txt', 'r') as vip_file:
-    TOKEN = vip_file.read()
+# with open('bot_token.txt', 'r') as vip_file:
+#     TOKEN = vip_file.read()
+
+TOKEN = os.getenv('TOKEN', 0)
+
+if TOKEN == 0:
+    print("No token")
 
 stickers_dict = {}
 with open('stickers_id.txt', 'r') as stickers_file:
@@ -23,11 +29,11 @@ hour_now = datetime.datetime.now().hour
 minute_now = datetime.datetime.now().minute
 
 # USERS = set()
-
-src_markup = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-src_markup_btn1 = types.KeyboardButton('Лучшие')
-src_markup_btn2 = types.KeyboardButton('Всё подряд')
-src_markup.add(src_markup_btn1, src_markup_btn2)
+#
+# src_markup = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+# src_markup_btn1 = types.KeyboardButton('Лучшие')
+# src_markup_btn2 = types.KeyboardButton('Всё подряд')
+# src_markup.add(src_markup_btn1, src_markup_btn2)
 
 
 
