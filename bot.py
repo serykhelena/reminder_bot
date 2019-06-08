@@ -12,7 +12,7 @@ import os
 TOKEN = os.getenv('TOKEN', 0)
 
 if TOKEN == 0:
-    print("No token")
+    print("No token at all")
 
 stickers_dict = {}
 with open('stickers_id.txt', 'r') as stickers_file:
