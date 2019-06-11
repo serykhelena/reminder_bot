@@ -5,11 +5,15 @@ from telebot import types
 import datetime
 from datetime import date
 import os
+import sys
+sys.path.insert(0, './calendar-telegram-master')
 
-# with open('bot_token.txt', 'r') as vip_file:
-#     TOKEN = vip_file.read()
+import telegramcalendar
 
-TOKEN = os.getenv('TOKEN', 0)
+with open('bot_token.txt', 'r') as vip_file:
+    TOKEN = vip_file.read()
+
+# TOKEN = os.getenv('TOKEN', 0)
 
 if TOKEN == 0:
     print("No token at all")
@@ -29,12 +33,6 @@ hour_now = datetime.datetime.now().hour
 minute_now = datetime.datetime.now().minute
 
 # USERS = set()
-#
-# src_markup = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-# src_markup_btn1 = types.KeyboardButton('Лучшие')
-# src_markup_btn2 = types.KeyboardButton('Всё подряд')
-# src_markup.add(src_markup_btn1, src_markup_btn2)
-
 
 
 @bot.message_handler(commands=['help'])
@@ -45,6 +43,24 @@ def command_handler(message):
 def sticker_handler(message):
     print(message.sticker)
 
+@bot.message_handler(commands=['calendar'])
+def get_calendar(message):
+    now = datetime.datetime.now() #Текущая дата
+    chat_id = message.chat.id
+    date = (now.year, now.month)
+
+    # current_shown_dates[chat_id] = date #Сохраним текущую дату в словарь
+    markup = telegramcalendar.create_calendar(now.year, now.month)
+    bot.send_message(message.chat.id, "Please, choose the date", reply_markup=markup)
+    bot.answer_callback_query(chat_id, text="Дата выбрана")
+
+
+
+
+@bot.message_handler(commands=['calendar'])
+def key_handler(message):
+    pass
+
 
 @bot.message_handler(commands=['start'])
 def command_start(message):
@@ -53,38 +69,66 @@ def command_start(message):
                  'Remember that for now I\'m working only with Moscow time\n'
                  f'Moscow time is {time_now}\n'
                  f'You can set time and event ONLY for today {date_now}\n'
-                 'Now give me time and name of event that you want I remind you\n'
-                 'Use key-word \"set\", please'
                  )
-    bot.register_next_step_handler(message, ask_time_and_event)
+    bot.send_message(message.chat.id, "Enter the time in format hour:minutes, please")
+
+    bot.register_next_step_handler(message, ask_time)
 
 
-def ask_time_and_event(message):
+alarm_hour = 0
+alarm_minute = 0
 
-    chat_id = message.chat.id
-    text = message.text
-    if 'set' in text:
-        radz_indx = message.text.find(':')
-        alarm_hour = int(''.join(c for c in message.text[:radz_indx] if c.isdigit()))
-        alarm_minute = int(''.join(c for c in message.text[radz_indx:] if c.isdigit()))
+def ask_time(message):
+    global alarm_hour
+    global alarm_minute
+    radz_indx = message.text.find(':')
+    alarm_hour = int(''.join(c for c in message.text[:radz_indx] if c.isdigit()))
+    alarm_minute = int(''.join(c for c in message.text[radz_indx:] if c.isdigit()))
 
-        remind_msg = message.text[radz_indx+4:]
+    bot.send_message(message.chat.id, "Enter the name of event, please")
 
-        msg_minute = '0'+str(alarm_minute) if alarm_minute < 10 else str(alarm_minute)
+    bot.register_next_step_handler(message, ask_event)
 
-        bot.reply_to(message,
-                     f'Ok, I will remind you {date_now} at {alarm_hour}:{msg_minute}\n'
-                     f'with message \"{remind_msg}\"\n'
-                     )
+def gen_makup():
+    markup = types.InlineKeyboardMarkup()
+    markup.row_width = 2
+    markup.add(types.InlineKeyboardButton("15 minutes", callback_data="15"),
+               types.InlineKeyboardButton("30 minutes", callback_data="30"))
 
-        while datetime.datetime.now().hour != alarm_hour:
-            continue
-        while datetime.datetime.now().minute != alarm_minute:
-            continue
-        bot.reply_to(message, remind_msg)
-        bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_DONE'])
-    else:
-        bot.reply_to(message, 'Please, use key-word \'set\'')
+    return markup
+
+
+event = ''
+
+def ask_event(message):
+    global event
+
+    event = message.text
+
+    bot.send_message(message.chat.id, f"I will remind you at {alarm_hour}:{alarm_minute} about \"{event}\"")
+
+    # dump way to remind >___<
+    while datetime.datetime.now().hour != alarm_hour:
+        continue
+    while datetime.datetime.now().minute != alarm_minute:
+        continue
+    bot.reply_to(message, f"ALARM! {event}")
+    bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_DONE'])
+
+    keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+    delay_15 = types.KeyboardButton('15 minutes')
+    delay_30 = types.KeyboardButton('30 minutes')
+    keyboard.add(delay_15, delay_30)
+
+
+    keyboard.row('15 minutes', '30 minutes')
+
+    minutes_15 = types.InlineKeyboardButton(text='15 minutes', callback_data='15');
+    minutes_30 = types.InlineKeyboardButton(text='30 minutes', callback_data='30');
+
+    print(minutes_15, minutes_30)
+    # alarm_minute += int(minutes_15)
+
 
 
 @bot.message_handler(content_types=['text'])
