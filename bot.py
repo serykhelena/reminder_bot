@@ -5,10 +5,10 @@ from telebot import types
 import datetime
 from datetime import date
 import os
-import sys
-sys.path.insert(0, './calendar-telegram-master')
+# import sys
+# sys.path.insert(0, './calendar-telegram-master')
 
-import telegramcalendar
+# import telegramcalendar
 
 with open('bot_token.txt', 'r') as vip_file:
     TOKEN = vip_file.read()
@@ -32,7 +32,6 @@ time_now = datetime.datetime.now().strftime("%H:%M:%S")
 hour_now = datetime.datetime.now().hour
 minute_now = datetime.datetime.now().minute
 
-# USERS = set()
 
 
 @bot.message_handler(commands=['help'])
@@ -115,20 +114,35 @@ def ask_event(message):
     bot.reply_to(message, f"ALARM! {event}")
     bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_DONE'])
 
+''' Not working T_T
     keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
     delay_15 = types.KeyboardButton('15 minutes')
     delay_30 = types.KeyboardButton('30 minutes')
     keyboard.add(delay_15, delay_30)
 
+    msg = bot.reply_to(message, 'Ok, I will remind you later', reply_markup=markup)
+    bot.register_next_step_handler(msg, delay_handler)
 
-    keyboard.row('15 minutes', '30 minutes')
 
-    minutes_15 = types.InlineKeyboardButton(text='15 minutes', callback_data='15');
-    minutes_30 = types.InlineKeyboardButton(text='30 minutes', callback_data='30');
+def delay_handler(message):
+    chat_id = message.chat.id
+    if message.text == '15 minutes':
+        print('call 15 min later')
+        pass
+    elif message.text == '30 minutes':
+        print('call 30 min later')
+        pass
 
-    print(minutes_15, minutes_30)
+    # keyboard.row('15 minutes', '30 minutes')
+    #
+    # minutes_15 = types.InlineKeyboardButton(text='15 minutes', callback_data='15');
+    # minutes_30 = types.InlineKeyboardButton(text='30 minutes', callback_data='30');
+    #
+    # print(minutes_15, minutes_30)
     # alarm_minute += int(minutes_15)
+'''
 
+# USERS = set()
 
 
 @bot.message_handler(content_types=['text'])
