@@ -5,6 +5,10 @@ from telebot import types
 import datetime
 from datetime import date
 import os
+# import sys
+# sys.path.insert(0, './calendar-telegram-master')
+
+# import telegramcalendar
 
 # with open('bot_token.txt', 'r') as vip_file:
 #     TOKEN = vip_file.read()
@@ -29,16 +33,6 @@ time_now = datetime.datetime.now().strftime("%H:%M:%S")
 hour_now = datetime.datetime.now().hour
 minute_now = datetime.datetime.now().minute
 
-# USERS = set()
-#
-# src_markup = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-# src_markup_btn1 = types.KeyboardButton('Лучшие')
-# src_markup_btn2 = types.KeyboardButton('Всё подряд')
-# src_markup.add(src_markup_btn1, src_markup_btn2)
-
-
-
-
 @bot.message_handler(commands=['help'])
 def command_handler(message):
     bot.reply_to(message, "Here all info supposed to be")
@@ -47,16 +41,6 @@ def command_handler(message):
 def sticker_handler(message):
     print(message.sticker)
 
-# keyboard_hider = types.ReplyKeyboardRemove()
-
-
-@bot.message_handler(commands=['key'])
-def start_message(message):
-    keyboard = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    keyboard.row('15 minutes', '30 minutes')
-    bot.send_message(message.chat.id, 'Choose the time you want to postpone your event', reply_markup=keyboard)
-
-
 @bot.message_handler(commands=['start'])
 def command_start(message):
     bot.reply_to(message,
@@ -64,38 +48,81 @@ def command_start(message):
                  'Remember that for now I\'m working only with Moscow time\n'
                  f'Moscow time is {time_now}\n'
                  f'You can set time and event ONLY for today {date_now}\n'
-                 'Now give me time and name of event that you want I remind you\n'
-                 'Use key-word \"set\", please'
                  )
-    bot.register_next_step_handler(message, ask_time_and_event)
+    bot.send_message(message.chat.id, "Enter the time in format hour:minutes, please")
+
+    bot.register_next_step_handler(message, ask_time)
 
 
-def ask_time_and_event(message):
+alarm_hour = 0
+alarm_minute = 0
 
+def ask_time(message):
+    global alarm_hour
+    global alarm_minute
+    radz_indx = message.text.find(':')
+    alarm_hour = int(''.join(c for c in message.text[:radz_indx] if c.isdigit()))
+    alarm_minute = int(''.join(c for c in message.text[radz_indx:] if c.isdigit()))
+
+    bot.send_message(message.chat.id, "Enter the name of event, please")
+
+    bot.register_next_step_handler(message, ask_event)
+
+def gen_makup():
+    markup = types.InlineKeyboardMarkup()
+    markup.row_width = 2
+    markup.add(types.InlineKeyboardButton("15 minutes", callback_data="15"),
+               types.InlineKeyboardButton("30 minutes", callback_data="30"))
+
+    return markup
+
+
+event = ''
+
+def ask_event(message):
+    global event
+
+    event = message.text
+
+    bot.send_message(message.chat.id, f"I will remind you at {alarm_hour}:{alarm_minute} about \"{event}\"")
+
+    # dump way to remind >___<
+    while datetime.datetime.now().hour != alarm_hour:
+        continue
+    while datetime.datetime.now().minute != alarm_minute:
+        continue
+    bot.reply_to(message, f"ALARM! {event}")
+    bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_DONE'])
+
+''' Not working T_T
+    keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+    delay_15 = types.KeyboardButton('15 minutes')
+    delay_30 = types.KeyboardButton('30 minutes')
+    keyboard.add(delay_15, delay_30)
+
+    msg = bot.reply_to(message, 'Ok, I will remind you later', reply_markup=markup)
+    bot.register_next_step_handler(msg, delay_handler)
+
+
+def delay_handler(message):
     chat_id = message.chat.id
-    text = message.text
-    if 'set' in text:
-        radz_indx = message.text.find(':')
-        alarm_hour = int(''.join(c for c in message.text[:radz_indx] if c.isdigit()))
-        alarm_minute = int(''.join(c for c in message.text[radz_indx:] if c.isdigit()))
+    if message.text == '15 minutes':
+        print('call 15 min later')
+        pass
+    elif message.text == '30 minutes':
+        print('call 30 min later')
+        pass
 
-        remind_msg = message.text[radz_indx+4:]
+    # keyboard.row('15 minutes', '30 minutes')
+    #
+    # minutes_15 = types.InlineKeyboardButton(text='15 minutes', callback_data='15');
+    # minutes_30 = types.InlineKeyboardButton(text='30 minutes', callback_data='30');
+    #
+    # print(minutes_15, minutes_30)
+    # alarm_minute += int(minutes_15)
+'''
 
-        msg_minute = '0'+str(alarm_minute) if alarm_minute < 10 else str(alarm_minute)
-
-        bot.reply_to(message,
-                     f'Ok, I will remind you {date_now} at {alarm_hour}:{msg_minute}\n'
-                     f'with message \"{remind_msg}\"\n'
-                     )
-
-        while datetime.datetime.now().hour != alarm_hour:
-            continue
-        while datetime.datetime.now().minute != alarm_minute:
-            continue
-        bot.reply_to(message, remind_msg)
-        bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_DONE'])
-    else:
-        bot.reply_to(message, 'Please, use key-word \'set\'')
+# USERS = set()
 
 
 @bot.message_handler(content_types=['text'])
