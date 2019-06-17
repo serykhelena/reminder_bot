@@ -77,9 +77,9 @@ def ask_event(message):
 
 
     text_hour = alarm_hour if alarm_hour > 9 else "0" + str(alarm_hour)
-    
+    text_minutes = alarm_minute if alarm_minute > 9 else "0" + str(alarm_minute)
 
-    bot.send_message(message.chat.id, f"I will remind you at {text_hour}:{alarm_minute} about \"{event}\"")
+    bot.send_message(message.chat.id, f"I will remind you at {text_hour}:{text_minutes} about \"{event}\"")
 
     # dump way to remind >___<
     while datetime.datetime.now().hour != alarm_hour:
