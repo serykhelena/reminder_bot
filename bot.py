@@ -68,15 +68,6 @@ def ask_time(message):
 
     bot.register_next_step_handler(message, ask_event)
 
-def gen_makup():
-    markup = types.InlineKeyboardMarkup()
-    markup.row_width = 2
-    markup.add(types.InlineKeyboardButton("15 minutes", callback_data="15"),
-               types.InlineKeyboardButton("30 minutes", callback_data="30"))
-
-    return markup
-
-
 event = ''
 
 def ask_event(message):
@@ -84,7 +75,11 @@ def ask_event(message):
 
     event = message.text
 
-    bot.send_message(message.chat.id, f"I will remind you at {alarm_hour}:{alarm_minute} about \"{event}\"")
+
+    text_hour = alarm_hour if alarm_hour > 9 else "0" + str(alarm_hour)
+    
+
+    bot.send_message(message.chat.id, f"I will remind you at {text_hour}:{alarm_minute} about \"{event}\"")
 
     # dump way to remind >___<
     while datetime.datetime.now().hour != alarm_hour:
@@ -155,9 +150,6 @@ def event_handler(message):
                      f"{message.from_user.first_name}, Sorry, I don\'t get it!"
                      )
         bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_AWKWARD'])
-
-
-
 
 
 @bot.message_handler(content_types=['photo'])
