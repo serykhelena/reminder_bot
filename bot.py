@@ -11,6 +11,7 @@ import os
 
 TOKEN = os.getenv('TOKEN', 0)
 
+
 if TOKEN == 0:
     print("No token at all")
 
@@ -37,6 +38,7 @@ minute_now = datetime.datetime.now().minute
 
 
 
+
 @bot.message_handler(commands=['help'])
 def command_handler(message):
     bot.reply_to(message, "Here all info supposed to be")
@@ -44,6 +46,15 @@ def command_handler(message):
 @bot.message_handler(content_types=['sticker'])
 def sticker_handler(message):
     print(message.sticker)
+
+# keyboard_hider = types.ReplyKeyboardRemove()
+
+
+@bot.message_handler(commands=['key'])
+def start_message(message):
+    keyboard = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+    keyboard.row('15 minutes', '30 minutes')
+    bot.send_message(message.chat.id, 'Choose the time you want to postpone your event', reply_markup=keyboard)
 
 
 @bot.message_handler(commands=['start'])
@@ -117,6 +128,9 @@ def event_handler(message):
                      f"{message.from_user.first_name}, Sorry, I don\'t get it!"
                      )
         bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_AWKWARD'])
+
+
+
 
 
 @bot.message_handler(content_types=['photo'])
