@@ -10,10 +10,10 @@ import os
 
 # import telegramcalendar
 
-with open('bot_token.txt', 'r') as vip_file:
-    TOKEN = vip_file.read()
+# with open('bot_token.txt', 'r') as vip_file:
+#     TOKEN = vip_file.read()
 
-# TOKEN = os.getenv('TOKEN', 0)
+TOKEN = os.getenv('TOKEN', 0)
 
 
 if TOKEN == 0:
