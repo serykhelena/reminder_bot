@@ -2,7 +2,7 @@
 
 import telebot
 from telebot import types
-import datetime
+import datetime as dt
 from datetime import date
 import os
 # import sys
@@ -10,14 +10,15 @@ import os
 
 # import telegramcalendar
 
-# with open('bot_token.txt', 'r') as vip_file:
-#     TOKEN = vip_file.read()
+with open('bot_token.txt', 'r') as vip_file:
+    TOKEN = vip_file.read()
 
-TOKEN = os.getenv('TOKEN', 0)
+# TOKEN = os.getenv('TOKEN', 0)
 
 
 if TOKEN == 0:
     print("No token at all")
+bot = telebot.TeleBot(TOKEN)
 
 stickers_dict = {}
 with open('stickers_id.txt', 'r') as stickers_file:
@@ -26,12 +27,12 @@ with open('stickers_id.txt', 'r') as stickers_file:
         stickers_dict[name] = id.strip()
 
 
-bot = telebot.TeleBot(TOKEN)
+day_info = dt.datetime.utcnow() + dt.timedelta(hours=3)
+date_now = day_info.strftime("%d-%m-%Y")
+time_now = day_info.strftime("%H:%M:%S")
 
-date_now = date.today()
-time_now = datetime.datetime.now().strftime("%H:%M:%S")
-hour_now = datetime.datetime.now().hour
-minute_now = datetime.datetime.now().minute
+hour_now = dt.datetime.now().hour
+minute_now = dt.datetime.now().minute
 
 @bot.message_handler(commands=['help'])
 def command_handler(message):
@@ -61,8 +62,8 @@ def ask_time(message):
     global alarm_hour
     global alarm_minute
     radz_indx = message.text.find(':')
-    alarm_hour = int(''.join(c for c in message.text[:radz_indx] if c.isdigit()))
-    alarm_minute = int(''.join(c for c in message.text[radz_indx:] if c.isdigit()))
+    alarm_hour = ''.join(c for c in message.text[:radz_indx] if c.isdigit())
+    alarm_minute = ''.join(c for c in message.text[radz_indx:] if c.isdigit())
 
     bot.send_message(message.chat.id, "Enter the name of event, please")
 
@@ -76,15 +77,15 @@ def ask_event(message):
     event = message.text
 
 
-    text_hour = alarm_hour if alarm_hour > 9 else "0" + str(alarm_hour)
-    text_minutes = alarm_minute if alarm_minute > 9 else "0" + str(alarm_minute)
+    text_hour = alarm_hour #if int(alarm_hour) > 9 else "0" + str(alarm_hour)
+    text_minutes = alarm_minute #if int(alarm_minute) > 9 else "0" + str(alarm_minute)
 
     bot.send_message(message.chat.id, f"I will remind you at {text_hour}:{text_minutes} about \"{event}\"")
 
     # dump way to remind >___<
-    while datetime.datetime.now().hour != alarm_hour:
+    while (dt.datetime.utcnow() + dt.timedelta(hours=3)).strftime('%H') != alarm_hour:
         continue
-    while datetime.datetime.now().minute != alarm_minute:
+    while (dt.datetime.utcnow() + dt.timedelta(hours=3)).strftime('%M') != alarm_minute:
         continue
     bot.reply_to(message, f"ALARM! {event}")
     bot.send_sticker(message.chat.id, stickers_dict['STICKER_UNI_DONE'])
